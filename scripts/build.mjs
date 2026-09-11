@@ -7,12 +7,14 @@ import { spawnSync } from 'node:child_process';
 // The source is already static. Verify it without removing or regenerating dist.
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dist = join(root, 'dist');
-for (const name of ['index.html', 'styles.css', 'app.js', 'data/manifest.json', 'data/LICENSE-model.txt']) {
+for (const name of ['index.html', 'styles.css', 'app.js', 'circuit-worker.js', 'circuit-core.js', 'load-data.js', 'data/manifest.json', 'data/LICENSE-model.txt']) {
   await access(join(dist, name));
 }
-const syntax = spawnSync(process.execPath, ['--check', join(dist, 'app.js')], { stdio: 'inherit' });
-if (syntax.error) throw syntax.error;
-if (syntax.status !== 0) throw new Error('Browser JavaScript failed its syntax check.');
+for (const name of ['app.js', 'circuit-worker.js', 'circuit-core.js', 'load-data.js']) {
+  const syntax = spawnSync(process.execPath, ['--check', join(dist, name)], { stdio: 'inherit' });
+  if (syntax.error) throw syntax.error;
+  if (syntax.status !== 0) throw new Error(`JavaScript failed its syntax check: ${name}`);
+}
 
 const data = join(dist, 'data');
 const manifest = JSON.parse(await readFile(join(data, 'manifest.json'), 'utf8'));
@@ -25,4 +27,4 @@ for (const asset of manifest.assets) {
   if (hash !== asset.sha256) throw new Error(`Data checksum mismatch: ${asset.file}`);
 }
 console.log(`Static viewer ready: ${manifest.neurons.toLocaleString('en-US')} neurons; ${manifest.assets.length} data assets verified.`);
-console.log('Output directory: dist. Simulation engine is not included in this build.');
+console.log('Output directory: dist. Electrical circuit engine included; drug pharmacology and eye optics are not modeled.');
