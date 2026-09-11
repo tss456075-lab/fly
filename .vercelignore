@@ -1,0 +1,5 @@
+.openai
+.sites-runtime
+.git
+node_modules
+*.zip
